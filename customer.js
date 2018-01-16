@@ -39,20 +39,43 @@ function User() {
         .prompt({
             name: 'id',
             type: 'input',
-            message: 'Which item id would you like to buy?',
-        },
-        {
-            name: 'quantity',
-            type: 'input',
-            message: 'How many would you like to buy?',
+            message: 'Which item id would you like to buy? press q to quit',
+            validate: function (val) {
+                return !isNaN(val) || val.toLowerCase() === "q";
+            }
+        })
+
+        .then(function (val) {
+    var item = parseInt(id);
+    var quantity = input.quantity;
+    checkToExit(item);
+
+    if (item) {
+        promptUserForQuantity(item);
+    } else {
+        console.log('please choose a valid item');
+    }
+});
+}
+
+function promptUserForQuantity(item){
+inquirer
+    .prompt([
+    {
+        name: 'quantity',
+        type: 'input',
+        message: 'How many would you like to buy? press q to exit',
+        validate: function (val){
+            return val > 0 || val.toLowerCase() === "q";
         }
-        ).then(function (input) {
+    }
+])
 
-            var item = input.id;
-            var quantity = input.quantity;
+   
 
+
+    function placeOrder(product) {
             var querySelect = 'SELECT * FROM products WHERE ?';
-
             connection.query(querySelect, { id: item }, function (err, data) {
                 if (err) throw err;
 
@@ -77,21 +100,20 @@ function User() {
 
                             connection.end();
                         })
-                     } else {
+                    } else {
                         console.log('Order not placed, item quantity is low!');
 
                         inventory();
                     }
                 }
-            })
-        })
+            });
+        }
+                
+    
+    function checkToExit(choice) {
+        if (choice.toLowerCase() === "q") {
+            console.log("Goodbye!");
+            process.exit(0);
+        }
+    }
 }
-
-
-// function run() {
-
-//     inventory();
-// }
-
-
-// run();
